@@ -74,11 +74,64 @@ namespace ProjectTS
 
         public void Deserialize()
         {
+            index = 0;
+            //deserializowanie pola operation
+            for (int i = 0; i < operation.Length; i++)
+            {
+                operation[i] = bitArr[index];
+                index++;
+            }
 
+            //deserializowanie pola number1
+            GetInt();
+
+            //deserializowanie pola number2
+            GetInt();
+
+            //deserializowanie pola status
+            for (int i = 0; i < status.Length; i++)
+            {
+                status[i] = bitArr[index];
+                index++;
+            }
+
+            //deserializowanie pola id
+            for (int i = 0; i < id.Length; i++)
+            {
+                id[i] = bitArr[index];
+                index++;
+            }
+
+            //deserializowanie pola state
+            for (int i = 0; i < state.Length; i++)
+            {
+                state[i] = bitArr[index];
+                index++;
+            }
         }
 
         // funkcje do deserializacji
-        
+        public void GetInt() //boo oznacza czy jest to number1 (false) czy number2 (true)
+        {
+            BitArray temp = new BitArray(32); //wycina kawałek oryginalnej tablicy z liczbą do konwersji
+            for (int i = 0; i < 32; i++)
+            {
+                temp[0] = bitArr[index];
+                index++;
+            }
+            int[] arr = new int[1];
+            temp.CopyTo(arr, 0);
+
+            if (index==35) //jeżeli indeks jest równy 3+32=35 po kopiowaniu tablicy, to zapisujemy do number1
+            {
+                number1 = arr[0];
+            }
+            else if(index == 67) //jeżeli indeks jest równy 3+32+32=67 po kopiowaniu tablicy, to zapisujemy do number1
+            {
+                number2 = arr[0];
+            }
+            
+        }
         // koniec funkcji do deresializacji
 
 
