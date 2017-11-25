@@ -242,7 +242,7 @@ namespace ProjectTS
             }
         } //ustawianie statusu (2bit)
 
-        public Packet(int size)
+        public Packet(int size) 
         {
             this.size = size;
             bitArr = new BitArray(size);
