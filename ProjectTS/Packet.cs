@@ -113,7 +113,7 @@ namespace ProjectTS
         // funkcje do deserializacji
         public void GetInt() //boo oznacza czy jest to number1 (false) czy number2 (true)
         {
-            BitArray temp = new BitArray(32); //wycina kawałek oryginalnej tablicy z liczbą do konwersji
+            BitArray temp = new BitArray(32); //wycina kawałek oryginalnej tablicy z liczbą, potrzebne do konwersji
             for (int i = 0; i < 32; i++)
             {
                 temp[0] = bitArr[index];
@@ -220,22 +220,22 @@ namespace ProjectTS
         {
             switch (num)
             {
-                case 0: //status 0
+                case 0: //dzielenie przez 0
                     status.Set(0, false);
                     status.Set(1, false);
                     break;
 
-                case 1: //status 1
+                case 1: //overrange
                     status.Set(0, false);
                     status.Set(1, true);
                     break;
 
-                case 2: //status 2
+                case 2: //status 3 niezdefiniowane
                     status.Set(0, true);
                     status.Set(1, false);
                     break;
 
-                case 3: //status 3
+                case 3: //status 3 niezdefiniowane
                     status.Set(0, true);
                     status.Set(1, true);
                     break;
