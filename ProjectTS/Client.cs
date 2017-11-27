@@ -18,25 +18,18 @@ namespace ProjectTS
         Socket serverSocket;
         SocketInformation clientSocketInfo;
 
-        //wytyczne
-        //
-        //połączeniowy,
-        //wszystkie dane przesyłane w postaci binarnej,
-        //pole operacji o długości 3 bitów,
-        //pola liczb o długości 32 bitów,
-        //pole statusu o długości 2 bitów,
-        //pole identyfikatora o długości 8 bitów,
-        //dodatkowe pola zdefiniowane przez programistę
-
         public bool Connect()
         {
             // The chat client always starts up on the localhost, using the default port 
             IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
             IPAddress serverAddr = hostInfo.AddressList[1];
             var clientEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
+
             // Create a client socket and connect it to the endpoint 
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            int Timeout = 5;
+
+            //Try to connect to server (Timeout = 30s)
+            int Timeout = 6;
             while(Timeout>0){
                 try
                 {
@@ -47,7 +40,7 @@ namespace ProjectTS
                 {
                     Console.WriteLine(ex.Message);
                     Timeout--;
-                    System.Threading.Thread.Sleep(50);
+                    System.Threading.Thread.Sleep(5000);
                     if (Timeout == 0)
                     {
                         Console.WriteLine("Connection canceled due to timeout");
