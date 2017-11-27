@@ -15,50 +15,83 @@ namespace ProjectTS
 
         //Server socket stuff
         Socket serverSocket;
+        Socket clientSocket;
+
         SocketInformation serverSocketInfo;
 
-        public string Startup()
+        public void Startup()
         {
             // The chat server always starts up on the localhost, using the default port 
             IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
             IPAddress serverAddr = hostInfo.AddressList[1];
             var serverEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
-
             // Create a listener socket and bind it to the endpoint 
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverSocket.Bind(serverEndPoint);
 
-            return serverSocket.LocalEndPoint.ToString();
+            Console.WriteLine("Server started at:" + serverSocket.LocalEndPoint.ToString());
         }
 
-        public string Listen()
+        public void Listen()
         {
             int backlog = 0;
             try
             {
                 serverSocket.Listen(backlog);
-                return "Server listening";
+                Console.WriteLine("Server listening");
+                clientSocket = serverSocket.Accept();
+                Console.WriteLine("Client connected");
             }
             catch (Exception ex)
             {
-                return "Failed to listen" + ex.ToString();
+                Console.WriteLine("Failed to listen" + ex.ToString());
             }
         }
 
-        public string ReceiveData()
+        public bool Disconnect()
         {
-            Socket receiveSocket;
+            clientSocket.Close();
+            return true;
+        }
+
+        public void Run()
+        {
+            while (true)
+            {
+                ReceiveData();
+                SendData();
+            }
+        }
+
+        public void ReceiveData()
+        {
             byte[] buffer = new byte[256];
+            try
+            {
+                var bytesrecd = clientSocket.Receive(buffer);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            Console.WriteLine("Server received packet");
+        }
 
-            receiveSocket = serverSocket.Accept();
-
-            var bytesrecd = receiveSocket.Receive(buffer);
-
-            receiveSocket.Close();
-
-            Encoding encoding = Encoding.UTF8;
-
-            return encoding.GetString(buffer);
+        public bool SendData()
+        {
+            //pack.Add(value);
+            Packet pack = new Packet(100);
+            pack.Add(10);
+            try
+            {
+                clientSocket.Send(pack.GetBytes());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
+            return true;
         }
     }
 }

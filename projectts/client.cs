@@ -12,7 +12,9 @@ namespace ProjectTS
     {
         const string DEFAULT_SERVER = "localhost";
         const int DEFAULT_PORT = 804;
-        
+
+        bool isConnected = false;
+
         //Client socket stuff 
         Socket clientSocket;
         Socket serverSocket;
@@ -35,6 +37,7 @@ namespace ProjectTS
                 {
                     clientSocket.Connect(clientEndPoint);
                     Timeout = 0;
+                    isConnected = true;
                 }
                 catch(Exception ex)
                 {
@@ -60,7 +63,7 @@ namespace ProjectTS
 
         public void Run()
         {
-            while (true)
+            while (isConnected)
             {
                 SendData();
                 ReceiveData();
@@ -76,13 +79,20 @@ namespace ProjectTS
             Console.WriteLine("Client received data");
         }
 
-        private bool SendData()
+        private void SendData()
         {
             Packet pack = new Packet(100);
             Console.WriteLine("Send number");
             pack.Add(Convert.ToInt32(Console.ReadLine()));
-            clientSocket.Send(pack.GetBytes());
-            return false;
+            try
+            {
+                clientSocket.Send(pack.GetBytes());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                isConnected = false;
+            }
         }
     }
 }
