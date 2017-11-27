@@ -68,7 +68,7 @@ namespace ProjectTS
             byte[] buffer = new byte[256];
 
             var bytesrecd = clientSocket.Receive(buffer);
-
+            Packet packet = new Packet(buffer);
             Console.WriteLine("Client received data");
         }
 

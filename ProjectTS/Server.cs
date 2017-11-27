@@ -61,8 +61,9 @@ namespace ProjectTS
             try
             {
                 var bytesrecd = clientSocket.Receive(buffer);
+                Packet packet = new Packet(buffer);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
