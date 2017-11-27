@@ -5,37 +5,38 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-//wytyczne
-//
-//połączeniowy,
-//wszystkie dane przesyłane w postaci binarnej,
-//pole operacji o długości 3 bitów,
-//pola liczb o długości 32 bitów,
-//pole statusu o długości 2 bitów,
-//pole identyfikatora o długości 8 bitów,
-//dodatkowe pola zdefiniowane przez programistę
-
 namespace ProjectTS
 {
+    #region Enums
     public enum Operation
     {
-        addition = 0b000,
-        substraction = 0b001,
-        multiplication = 0b010,
-        division = 0b011,
-        action1 = 0b100,
-        action2 = 0b101,
-        action3 = 0b110,
-        action4 = 0b111
+        Addition = 0b000,
+        Substraction = 0b001,
+        Multiplication = 0b010,
+        Division = 0b011,
+        Action1 = 0b100,
+        Action2 = 0b101,
+        Action3 = 0b110,
+        Action4 = 0b111
     }
 
-    public enum operacja
+    public enum Mode
     {
-        addition = 0b00,
-        substraction = 0b01,
-        multiplication = 0b10,
-        division = 0b011
+        TwoArguments = 0b00,
+        MultiArguments = 0b01,
+        MultiArgumentsLP = 0b10,
+        NotDefined = 0b011
     }
+
+    public enum State
+    {
+        Nothing = 0b00,
+        PamietajCholeroNieDzielPrzezZero = 0b01, //XDD
+        OutOfRange = 0b10,
+        NotDefined = 0b11
+    }
+
+    #endregion
 
     public class Packet
     {
@@ -43,92 +44,78 @@ namespace ProjectTS
         int index = 0;
         int size;
 
-        BitArray operation = new BitArray(3); //dla dwuargumentowych dodatkowe operacje (x -pierwszy argument, y -drugi argument):
-        int number1;                          //4: x^y; 5: pierwiasek stopnia y z x; 6: log o podstawie y z x; 7 czy x równa się y.
-        int number2;                          //dla wieloargumentowych tylko operacje +-*/
-        BitArray status = new BitArray(2);
-        BitArray id = new BitArray(8);
-        BitArray state = new BitArray(2); //odpowiada za informowanie serwera czy jest to pakiet           \
-                                          //z operacją dwuargumentową lub wieloargumentową o wartościach:  |
-                                          //"00"-operacja dwuargumentowa,                                  |-czekam na odpowiedz Marka
-                                          //"01"-operacja wieloargumentowa, ale nie ostatni pakiet,        | czy tak może być to zrobione
-                                          //"10"-operacja wieloargumentowa, ostatni pakiet.                / 
+        Operation operation;
+        int number1 = 0;
+        int number2 = 0;
+        State state = State.Nothing;
+        int sessionId;
+        Mode mode;
+
+        public Packet(int size)
+        {
+            this.size = size;
+            bitArr = new BitArray(size);
+        }
+
+        //wytyczne
+        //
+        //połączeniowy,
+        //wszystkie dane przesyłane w postaci binarnej,
+        //pole operacji o długości 3 bitów,
+        //pola liczb o długości 32 bitów,
+        //pole statusu o długości 2 bitów,
+        //pole identyfikatora o długości 8 bitów,
+        //dodatkowe pola zdefiniowane przez programistę
+
         public void Serialize()
         {
-            //serializowanie pola operation
-            foreach (bool b in operation)
-            {
-                bitArr.Set(index, b);
-                index++;
-            }
-
-            //serializowanie pola number1
-            this.Add(number1);
-
-            //serializowanie pola number2
-            {
-                this.Add(number2);
-            }
-
-            //serializowanie pola status
-            foreach (bool b in status)
-            {
-                bitArr.Set(index, b);
-                index++;
-            }
-
-            //serializowanie pola id
-            foreach (bool b in id)
-            {
-                bitArr.Set(index, b);
-                index++;
-            }
-
-            //serializowanie pola state
-            foreach (bool b in state)
-            {
-                bitArr.Set(index, b);
-                index++;
-            }
+            Add(operation);
+            Add(number1);
+            Add(number2);
+            Add(state);
+            Add(Convert.ToByte(sessionId));
+            Add(mode); //na takiej zasadzie + trzeba dodać logikę 
         }
 
-        public void Deserialize()
-        {
-            index = 0;
-            //deserializowanie pola operation
-            for (int i = 0; i < operation.Length; i++)
-            {
-                operation[i] = bitArr[index];
-                index++;
-            }
+        #region Deserialization
 
-            //deserializowanie pola number1
-            GetInt();
+        //public void Deserialize()
+        //{
+        //    index = 0;
+        //    //deserializowanie pola operation
+        //    for (int i = 0; i < operation.Length; i++)
+        //    {
+        //        operation[i] = bitArr[index];
+        //        index++;
+        //    }
 
-            //deserializowanie pola number2
-            GetInt();
+        //    //deserializowanie pola number1
+        //    GetInt();
 
-            //deserializowanie pola status
-            for (int i = 0; i < status.Length; i++)
-            {
-                status[i] = bitArr[index];
-                index++;
-            }
+        //    //deserializowanie pola number2
+        //    GetInt();
 
-            //deserializowanie pola id
-            for (int i = 0; i < id.Length; i++)
-            {
-                id[i] = bitArr[index];
-                index++;
-            }
+        //    //deserializowanie pola status
+        //    for (int i = 0; i < status.Length; i++)
+        //    {
+        //        status[i] = bitArr[index];
+        //        index++;
+        //    }
 
-            //deserializowanie pola state
-            for (int i = 0; i < state.Length; i++)
-            {
-                state[i] = bitArr[index];
-                index++;
-            }
-        }
+        //    //deserializowanie pola id
+        //    for (int i = 0; i < id.Length; i++)
+        //    {
+        //        id[i] = bitArr[index];
+        //        index++;
+        //    }
+
+        //    //deserializowanie pola state
+        //    for (int i = 0; i < state.Length; i++)
+        //    {
+        //        state[i] = bitArr[index];
+        //        index++;
+        //    }
+        //}
 
         // funkcje do deserializacji
         public void GetInt() //boo oznacza czy jest to number1 (false) czy number2 (true)
@@ -152,121 +139,10 @@ namespace ProjectTS
             }
             
         }
-        // koniec funkcji do deresializacji
 
+        #endregion
 
-        // funkcje do serializacji
-        public void SetOperation(int num) //ustawianie operacji (3bit)
-        {
-            switch (num)
-            {
-                case 0: //dodawanie
-                    operation.Set(0, false);
-                    operation.Set(1, false);
-                    operation.Set(2, false);
-                    break;
-
-                case 1: //odejmowanie
-                    operation.Set(0, false);
-                    operation.Set(1, false);
-                    operation.Set(2, true);
-                    break;
-
-                case 2: //mnożenie
-                    operation.Set(0, false);
-                    operation.Set(1, true);
-                    operation.Set(2, false);
-                    break;
-
-                case 3: //dzielenie
-                    operation.Set(0, false);
-                    operation.Set(1, true);
-                    operation.Set(2, true);
-                    break;
-
-                case 4: //potega
-                    operation.Set(0, true);
-                    operation.Set(1, false);
-                    operation.Set(2, false);
-                    break;
-
-                case 5: //pierwiastek
-                    operation.Set(0, true);
-                    operation.Set(1, false);
-                    operation.Set(2, true);
-                    break;
-
-                case 6: //logarytm
-                    operation.Set(0, true);
-                    operation.Set(1, true);
-                    operation.Set(2, false);
-                    break;
-
-                case 7: //czy równa
-                    operation.Set(0, true);
-                    operation.Set(1, true);
-                    operation.Set(2, true);
-                    break;
-            }
-        }
-
-        public void SetState(int num)
-        {
-            switch (num)
-            {
-                case 0: //operacja 2 argumentowa
-                    state.Set(0, false);
-                    state.Set(1, false);
-                    break;
-
-                case 1: //operacja wieloargumentowa, ale nie ostatni pakiet
-                    state.Set(0, false);
-                    state.Set(1, true);
-                    break;
-
-                case 2: //operacja wieloargumentowa, ostatni pakiet
-                    state.Set(0, true);
-                    state.Set(1, false);
-                    break;
-
-                case 3: //nie zdefiniowane
-                    state.Set(0, true);
-                    state.Set(1, true);
-                    break;
-            }
-        } //ustawianie state (czy operacja dwu czy wieloargumentowa) (2bit)
-
-        public void SetStatus(int num)
-        {
-            switch (num)
-            {
-                case 0: //dzielenie przez 0
-                    status.Set(0, false);
-                    status.Set(1, false);
-                    break;
-
-                case 1: //overrange
-                    status.Set(0, false);
-                    status.Set(1, true);
-                    break;
-
-                case 2: //status 3 niezdefiniowane
-                    status.Set(0, true);
-                    status.Set(1, false);
-                    break;
-
-                case 3: //status 3 niezdefiniowane
-                    status.Set(0, true);
-                    status.Set(1, true);
-                    break;
-            }
-        } //ustawianie statusu (2bit)
-
-        public Packet(int size) 
-        {
-            this.size = size;
-            bitArr = new BitArray(size);
-        }
+        #region Add methods
 
         public void Add(bool value)
         {
@@ -294,6 +170,30 @@ namespace ProjectTS
             }
         }
 
+        public void Add(Mode mo)
+        {
+            foreach (byte by in BitConverter.GetBytes((int)mo))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    this.Add((by & (1 << i)) != 0);
+                }
+                break;
+            }
+        }
+
+        public void Add(State st)
+        {
+            foreach (byte by in BitConverter.GetBytes((int)st))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    this.Add((by & (1 << i)) != 0);
+                }
+                break;
+            }
+        }
+
         public void Add(int value)
         {
             foreach (byte by in BitConverter.GetBytes(value))
@@ -301,9 +201,8 @@ namespace ProjectTS
                 Add(by);
             }
         }
-        // koniec funkcji do serializacji
 
-
+        #endregion
 
         public byte[] GetBytes()
         {

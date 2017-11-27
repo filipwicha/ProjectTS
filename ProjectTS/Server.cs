@@ -25,7 +25,6 @@ namespace ProjectTS
             IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
             IPAddress serverAddr = hostInfo.AddressList[1];
             var serverEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
-
             // Create a listener socket and bind it to the endpoint 
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverSocket.Bind(serverEndPoint);
@@ -67,9 +66,14 @@ namespace ProjectTS
         public void ReceiveData()
         {
             byte[] buffer = new byte[256];
-
-            var bytesrecd = clientSocket.Receive(buffer);
-
+            try
+            {
+                var bytesrecd = clientSocket.Receive(buffer);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
             Console.WriteLine("Server received packet");
         }
 
@@ -78,8 +82,16 @@ namespace ProjectTS
             //pack.Add(value);
             Packet pack = new Packet(100);
             pack.Add(10);
-            clientSocket.Send(pack.GetBytes());
-            return false;
+            try
+            {
+                clientSocket.Send(pack.GetBytes());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
+            return true;
         }
     }
 }
