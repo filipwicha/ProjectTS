@@ -8,22 +8,28 @@ namespace ProjectTS
 {
     class Program
     {
-        static Server server = new Server();
-        static Client client = new Client();
+        static Server server;
+        static Client client;
         
         static void Main(string[] args)
         {
-            string serverInfo = server.Startup();
-            Console.WriteLine("Server started at:" + serverInfo);
-
-            serverInfo = server.Listen();
-            Console.WriteLine(serverInfo);
-
-            client.SendData(Convert.ToInt32(Console.ReadLine()));
-
-            serverInfo = server.ReceiveData();
-            Console.WriteLine(serverInfo);
-
+            Console.WriteLine("Start as:\n1.Client\n2.Server");
+            if(Convert.ToInt32(Console.ReadLine()) == 1)
+            {
+                client = new Client();
+                if (client.Connect())
+                {
+                    client.Run();
+                    client.Disconnect();
+                }
+            }
+            else
+            {
+                server = new Server();
+                server.Startup();
+                server.Listen();
+                server.Run();
+            }
             Console.ReadLine();
             //exit 
         }

@@ -17,6 +17,26 @@ using System.Threading.Tasks;
 
 namespace ProjectTS
 {
+    public enum Operation
+    {
+        addition = 0b000,
+        substraction = 0b001,
+        multiplication = 0b010,
+        division = 0b011,
+        action1 = 0b100,
+        action2 = 0b101,
+        action3 = 0b110,
+        action4 = 0b111
+    }
+
+    public enum operacja
+    {
+        addition = 0b00,
+        substraction = 0b01,
+        multiplication = 0b10,
+        division = 0b011
+    }
+
     public class Packet
     {
         BitArray bitArr;
@@ -40,6 +60,18 @@ namespace ProjectTS
             for (int i = 0; i < 8; i++)
             {
                 this.Add((value & (1 << i)) != 0);
+            }
+        }
+
+        public void Add(Operation op)
+        {
+            foreach (byte by in BitConverter.GetBytes((int)op))
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                     this.Add((by & (1 << i)) != 0);
+                }
+                break;
             }
         }
 
