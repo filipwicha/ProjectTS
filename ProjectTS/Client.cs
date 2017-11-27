@@ -12,20 +12,15 @@ namespace ProjectTS
     {
         const string DEFAULT_SERVER = "localhost";
         const int DEFAULT_PORT = 804;
-        
-        //Client socket stuff 
         Socket clientSocket;
-        Socket serverSocket;
-        SocketInformation clientSocketInfo;
+        bool isConnected = false;
 
         public bool Connect()
         {
-            // The chat client always starts up on the localhost, using the default port 
             IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
             IPAddress serverAddr = hostInfo.AddressList[1];
             var clientEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
 
-            // Create a client socket and connect it to the endpoint 
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             //Try to connect to server (Timeout = 30s)
@@ -34,6 +29,7 @@ namespace ProjectTS
                 try
                 {
                     clientSocket.Connect(clientEndPoint);
+                    isConnected = true;
                     Timeout = 0;
                 }
                 catch(Exception ex)
@@ -60,7 +56,7 @@ namespace ProjectTS
 
         public void Run()
         {
-            while (true)
+            while (isConnected)
             {
                 SendData();
                 ReceiveData();
@@ -76,13 +72,19 @@ namespace ProjectTS
             Console.WriteLine("Client received data");
         }
 
-        private bool SendData()
+        private void SendData()
         {
-            Packet pack = new Packet(100);
+            Packet pack = new Packet();
             Console.WriteLine("Send number");
-            pack.Add(Convert.ToInt32(Console.ReadLine()));
-            clientSocket.Send(pack.GetBytes());
-            return false;
+            try
+            {
+                clientSocket.Send(pack.GetBytes());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                isConnected = false;
+            }
         }
     }
 }

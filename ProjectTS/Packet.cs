@@ -42,7 +42,6 @@ namespace ProjectTS
     {
         BitArray bitArr;
         int index = 0;
-        int size;
 
         Operation operation;
         int number1 = 0;
@@ -51,10 +50,9 @@ namespace ProjectTS
         int sessionId;
         Mode mode;
 
-        public Packet(int size)
+        public Packet()
         {
-            this.size = size;
-            bitArr = new BitArray(size);
+            bitArr = new BitArray(80);
         }
 
         //wytyczne
@@ -144,13 +142,13 @@ namespace ProjectTS
 
         #region Add methods
 
-        public void Add(bool value)
+        private void Add(bool value)
         {
             bitArr.Set(index, value);
             index++;
         }
 
-        public void Add(byte value)
+        private void Add(byte value)
         {
             for (int i = 0; i < 8; i++)
             {
@@ -158,7 +156,7 @@ namespace ProjectTS
             }
         }
 
-        public void Add(Operation op)
+        private void Add(Operation op)
         {
             foreach (byte by in BitConverter.GetBytes((int)op))
             {
@@ -170,7 +168,7 @@ namespace ProjectTS
             }
         }
 
-        public void Add(Mode mo)
+        private void Add(Mode mo)
         {
             foreach (byte by in BitConverter.GetBytes((int)mo))
             {
@@ -182,7 +180,7 @@ namespace ProjectTS
             }
         }
 
-        public void Add(State st)
+        private void Add(State st)
         {
             foreach (byte by in BitConverter.GetBytes((int)st))
             {
@@ -194,7 +192,7 @@ namespace ProjectTS
             }
         }
 
-        public void Add(int value)
+        private void Add(int value)
         {
             foreach (byte by in BitConverter.GetBytes(value))
             {
@@ -206,6 +204,7 @@ namespace ProjectTS
 
         public byte[] GetBytes()
         {
+            this.Serialize();
             byte[] ret = new byte[(bitArr.Length - 1) / 8 + 1];
             bitArr.CopyTo(ret, 0);
             return ret;
