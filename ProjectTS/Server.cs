@@ -27,7 +27,6 @@ namespace ProjectTS
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
             IPAddress serverAddr = hostInfo.AddressList[1];
-
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverSocket.Bind(new IPEndPoint(serverAddr, DEFAULT_PORT));
 
