@@ -70,6 +70,7 @@ namespace ProjectTS
             Deserialize();
         }
 
+        
         /*
         public Packet(int size, Operation operation, int number1, int number2, State state, int sessionId, Mode mode)
         {
