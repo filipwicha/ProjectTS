@@ -24,10 +24,10 @@ namespace ProjectTS
         Substraction = 0b001,
         Multiplication = 0b010,
         Division = 0b011,
-        Action1 = 0b100,
-        Action2 = 0b101,
-        Action3 = 0b110,
-        Action4 = 0b111
+        Sqrt = 0b100,
+        Log = 0b101,
+        Average = 0b110,
+        Equals = 0b111
     }
 
     public enum Mode
@@ -41,7 +41,7 @@ namespace ProjectTS
     public enum State
     {
         Nothing = 0b00,
-        PamietajCholeroNieDzielPrzezZero = 0b01, //XDD
+        DivisionByZero = 0b01, 
         OutOfRange = 0b10,
         NotDefined = 0b11
     }
@@ -53,19 +53,33 @@ namespace ProjectTS
         BitArray bitArr;
         int index = 0;
         int size;
-
+        
         Operation operation;
         int number1 = 0;
         int number2 = 0;
         State state = State.Nothing;
         int sessionId;
         Mode mode;
+        
 
         public Packet(int size)
         {
             this.size = size;
             bitArr = new BitArray(size);
         }
+
+        /*
+        public Packet(int size, Operation operation, int number1, int number2, State state, int sessionId, Mode mode)
+        {
+            this.size = size;
+            this.operation = operation;
+            this.number1 = number1;
+            this.number2 = number2;
+            this.state = state;
+            this.sessionId = sessionId;
+            this.mode = mode;
+        }
+        */
 
         //wytyczne
         //
@@ -88,6 +102,14 @@ namespace ProjectTS
         }
 
         #region Deserialization
+
+        public void Deserialize()
+        {
+
+        }
+
+
+
 
         //public void Deserialize()
         //{
@@ -216,6 +238,7 @@ namespace ProjectTS
 
         public byte[] GetBytes()
         {
+            this.Serialize();
             byte[] ret = new byte[(bitArr.Length - 1) / 8 + 1];
             bitArr.CopyTo(ret, 0);
             return ret;
