@@ -52,14 +52,19 @@ namespace ProjectTS
     {
         BitArray bitArr;
         int index = 0;
+//<<<<<<< HEAD
         int size;
+        
+//=======
 
+//>>>>>>> ceb62c61b28e6ce024e217973884b8290d21b82d
         Operation operation;
         int number1 = 0;
         int number2 = 0;
         State state = State.Nothing;
         int sessionId;
         Mode mode;
+        
 
         public Packet()
         {
@@ -71,6 +76,19 @@ namespace ProjectTS
             bitArr = new BitArray(buffer);
             Deserialize();
         }
+
+        /*
+        public Packet(int size, Operation operation, int number1, int number2, State state, int sessionId, Mode mode)
+        {
+            this.size = size;
+            this.operation = operation;
+            this.number1 = number1;
+            this.number2 = number2;
+            this.state = state;
+            this.sessionId = sessionId;
+            this.mode = mode;
+        }
+        */
 
         //wytyczne
         //
@@ -94,7 +112,60 @@ namespace ProjectTS
             mode = (Mode)GetInt(2);
         }
 
+//<<<<<<< HEAD
+        #region Deserialization
+
+        public void Deserialize()
+        {
+
+        }
+
+
+
+
+        //public void Deserialize()
+        //{
+        //    index = 0;
+        //    //deserializowanie pola operation
+        //    for (int i = 0; i < operation.Length; i++)
+        //    {
+        //        operation[i] = bitArr[index];
+        //        index++;
+        //    }
+
+        //    //deserializowanie pola number1
+        //    GetInt();
+
+        //    //deserializowanie pola number2
+        //    GetInt();
+
+        //    //deserializowanie pola status
+        //    for (int i = 0; i < status.Length; i++)
+        //    {
+        //        status[i] = bitArr[index];
+        //        index++;
+        //    }
+
+        //    //deserializowanie pola id
+        //    for (int i = 0; i < id.Length; i++)
+        //    {
+        //        id[i] = bitArr[index];
+        //        index++;
+        //    }
+
+        //    //deserializowanie pola state
+        //    for (int i = 0; i < state.Length; i++)
+        //    {
+        //        state[i] = bitArr[index];
+        //        index++;
+        //    }
+        //}
+
+        // funkcje do deserializacji
+        public void GetInt(); //boo oznacza czy jest to number1 (false) czy number2 (true)
+//=======
         private int GetInt(int length)
+//>>>>>>> ceb62c61b28e6ce024e217973884b8290d21b82d
         {
             var result = new int[1];
             BitArray tmp = new BitArray(32, false);

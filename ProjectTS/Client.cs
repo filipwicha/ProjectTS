@@ -12,7 +12,12 @@ namespace ProjectTS
     {
         const string DEFAULT_SERVER = "localhost";
         const int DEFAULT_PORT = 804;
-        
+
+        public string flag0 = "n"; //informs about not chosen operation (n), dualoperand (d), multioperand (m), multioperandls(mls) 
+        public bool flag1 = false; //informs about multioperand operation (0 -not last sent, 1 -last sent)
+
+        bool isConnected = false;
+
         //Client socket stuff 
         Socket clientSocket;
         bool isConnected = false;
@@ -61,6 +66,7 @@ namespace ProjectTS
         {
             int oneloop = 0; //loop once again and stop
             while (isConnected && oneloop != 1)
+            while (isConnected)
             {
                 SendData();
                 ReceiveData();
@@ -91,6 +97,8 @@ namespace ProjectTS
                     Console.WriteLine("Actual result = " + pack.number1);
                     break;
             }
+            Packet packet = new Packet(buffer);
+            Console.WriteLine("Client received data");
         }
 
         private void SendData()
@@ -211,6 +219,10 @@ namespace ProjectTS
             //ustalanie id
             pack.Serialize();
 
+//=======
+            Packet pack = new Packet();
+            Console.WriteLine("Send number");
+//>>>>>>> ceb62c61b28e6ce024e217973884b8290d21b82d
             try
             {
                 clientSocket.Send(pack.GetBytes());

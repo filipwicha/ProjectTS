@@ -23,8 +23,6 @@ namespace ProjectTS
         public int op = 1; //(1 - dodawanie, 2 - odejmowanie, 3 - mnozenie, 4 - dzielenie, 5 - rowna się)
         public int st = 0; //0-nothing, 1 divby0, 2 outofrange, 3 notdefined,
 
-        SocketInformation serverSocketInfo;
-
         public void Startup()
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
@@ -225,6 +223,7 @@ namespace ProjectTS
 
 
                 
+                Packet packet = new Packet(buffer);
             }
             catch (Exception ex)
             {
@@ -258,7 +257,8 @@ namespace ProjectTS
             //pack.id = ...........;
             pack.mode = NotDefined;
 
-
+            
+            Packet pack = new Packet();
             try
             {
                 clientSocket.Send(pack.GetBytes());
