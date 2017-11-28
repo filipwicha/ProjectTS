@@ -65,9 +65,10 @@ namespace ProjectTS
             {
                 var bytesrecd = clientSocket.Receive(buffer);
                 Packet pack = new Packet(buffer);
-
+                
                 if(pack.mode == Mode.TwoArguments)
                 {
+                    state = State.Nothing;
                     switch (pack.operation)
                     {
                         case Operation.Addition:
@@ -82,7 +83,7 @@ namespace ProjectTS
                         case Operation.Division:
                             if (pack.number2==0)
                             {
-                                pack.state = State.DivisionByZero;
+                                state = State.DivisionByZero;
                                 break;
                             }
                             result = pack.number1 / pack.number2;
@@ -90,7 +91,7 @@ namespace ProjectTS
                         case Operation.LinearFunction:
                             if (pack.number1 == 0)
                             {
-                                pack.state = State.DivisionByZero;
+                                state = State.DivisionByZero;
                                 break;
                             }
                             result = (-pack.number2) / pack.number1;
