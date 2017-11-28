@@ -21,7 +21,7 @@ namespace ProjectTS
         
         public int result = 0;
         Operation operation = Operation.Addition;
-        State state = State.Nothing; //0-nothing, 1 divby0, 2 outofrange, 3 notdefined,
+        State state = State.Nothing;
 
         public void Startup()
         {
@@ -107,9 +107,8 @@ namespace ProjectTS
                             break;
                     }
                 }
-                else if (pack.mode == Mode.MultiArguments)
+                else if (pack.mode == Mode.MultiArguments || pack.mode == Mode.MultiArgumentsLP )
                 {
-                    operation = pack.operation;
                     switch (operation)
                     {
                         case Operation.Addition:
@@ -122,8 +121,7 @@ namespace ProjectTS
                             result *= pack.number1;
                             break;
                         case Operation.Division:
-                            result /= pack.number1;
-                            if (pack.number2 == 0)
+                            if (pack.number1 == 0)
                             {
                                 state = State.DivisionByZero;
                             }
@@ -133,10 +131,7 @@ namespace ProjectTS
                             }
                             break;
                     }
-                }
-                else if (pack.mode == Mode.MultiArgumentsLP)
-                {
-                    
+                    operation = pack.operation;
                 }
             }
             catch (Exception ex)

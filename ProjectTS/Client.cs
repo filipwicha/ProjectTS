@@ -13,15 +13,14 @@ namespace ProjectTS
         const string DEFAULT_SERVER = "localhost";
         const int DEFAULT_PORT = 804;
 
-        public string flag0 = "n"; //informs about not chosen operation (n), dualoperand (d), multioperand (m), multioperandls(mls) 
-        public bool flag1 = false; //informs about multioperand operation (0 -not last sent, 1 -last sent)
+        Mode mode = Mode.NotDefined;
+        
+        //public bool flag1 = false; //informs about multioperand operation (0 -not last sent, 1 -last sent)
 
-        bool isConnected = false;
 
-        //Client socket stuff 
         Socket clientSocket;
         bool isConnected = false;
-
+        
         public bool Connect()
         {
             IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
@@ -38,7 +37,6 @@ namespace ProjectTS
                     clientSocket.Connect(clientEndPoint);
                     isConnected = true;
                     Timeout = 0;
-                    isConnected = true;
                 }
                 catch(Exception ex)
                 {
@@ -64,18 +62,18 @@ namespace ProjectTS
 
         public void Run()
         {
-            int oneloop = 0; //loop once again and stop
-            while (isConnected && oneloop != 1)
             while (isConnected)
             {
                 SendData();
                 ReceiveData();
-                if(flag1 == true)
+                if(mode == Mode.MultiArgumentsLP)
                 {
-                    oneloop++;
+                    return;
                 }
             }
         }
+
+        
 
         private void ReceiveData()
         {
@@ -84,146 +82,61 @@ namespace ProjectTS
             Packet pack = new Packet(buffer);
             switch (pack.state)
             {
-                case Nothing:
-                    Console.WriteLine("Actual result = " + pack.number1);
+                case State.Nothing:
+                    equation += pack.number1;
                     break;
-                case DivisionByZero:
-                    Console.WriteLine("Division by 0");
+                case State.DivisionByZero:
+                    equation = "Division by 0";
                     break;
-                case Nothing:
-                    Console.WriteLine("Out of range" + pack.number1);
-                    break;
-                case Nothing:
-                    Console.WriteLine("Actual result = " + pack.number1);
+                case State.OutOfRange:
+                    equation = "Out of range" + pack.number1;
                     break;
             }
-            Packet packet = new Packet(buffer);
-            Console.WriteLine("Client received data");
         }
-
 
         private void SendData()
         {
-            Packet pack = new Packet(100);
-            string temp;
-
-            if (flag0 == "n")
-            {
-                Console.Write("Choose the method (d - dual operand calculation, m - multi operand calculation): ");
-                Console.ReadLine(temp);
-                if (temp == "d") //dualoperand
-                {
-                    flag0 = "d";
-                    pack.mode = TwoArguments;
-                    Console.Write("Give an operand x: ");
-                    pack.number1 = Convert.ToInt32(Console.ReadLine());
-                    Console.Write("Give an operand y: ");
-                    pack.number2 = Convert.ToInt32(Console.ReadLine());
-                    Console.Write("Give an operator (add, sub, mul, div, sqrt, log, avg, eqals: ");
-                    Console.ReadLine(temp);
-                    switch(temp)
-                    {
-                        case "add":
-                            pack.operation = Addition;
-                            break;
-                        case "sub":
-                            pack.operation = Substraction;
-                            break;
-                        case "mul":
-                            pack.operation = Multiplication;
-                            break;
-                        case "div":
-                            pack.operation = Division;
-                            break;
-                        case "sqrt":
-                            pack.operation = Sqrt;
-                            break;
-                        case "log":
-                            pack.operation = Log;
-                            break;    
-                        case "avg":
-                            pack.operation = Average;
-                            break;
-                        case "egals":
-                            pack.operation = Equals;
-                            break;
-                    }
-                }
-                else if (temp == "m") //multioperand
-                {
-                flag0 = "m";
-                pack.mode = MultiArguments;
-                Console.Write("Give an operand x: ");
-                pack.number1 = Convert.ToInt32(Console.ReadLine());
-                pack.number2 = 0;
-                Console.Write("Give an operator (add, sub, mul, div, eqals (if the last operand): ");
-                Console.ReadLine(temp);
-                switch(temp)
-                    {
-                    case "add":
-                        pack.operation = Addition;
-                        break;
-                    case "sub":
-                        pack.operation = Substraction;
-                        break;
-                    case "mul":
-                        pack.operation = Multiplication;
-                        break;
-                    case "div":
-                        pack.operation = Division;
-                        break;
-                    case "eqals":
-                        pack.operation = Equals;
-                        flag1 = true;
-                        break;
-                    }
-                }
-            }
-
-
-
-
-
-            else
-            {
-                if (flag0 == "m") //multioperand
-                {
-                pack.mode = MultiArguments;
-                Console.Write("Give an operand x: ");
-                pack.number1 = Convert.ToInt32(Console.ReadLine());
-                pack.number2 = 0;
-                Console.Write("Give an operator (add, sub, mul, div, eqals (if the last operand)): ");
-                Console.ReadLine(temp);
-                switch(temp)
-                    {
-                    case "add":
-                        pack.operation = Addition;
-                        break;
-                    case "sub":
-                        pack.operation = Substraction;
-                        break;
-                    case "mul":
-                        pack.operation = Multiplication;
-                        break;
-                    case "div":
-                        pack.operation = Division;
-                        break;
-                    case "eqals":
-                        pack.operation = Equals;
-                        pack.mode = MultiArgumentsLP;
-                        flag1 = true;
-                        break;
-                    }
-                }
-            }
-            pack.state = Nothing;
-            //ustalanie id
-            pack.Serialize();
-
-//=======
             Packet pack = new Packet();
+            if (mode == Mode.NotDefined)
+            {
+                Console.Write("");
+                Console.WriteLine("Choose the method:\n1.Two argument\n2.Multiargument\n");
+                mode = (Mode)Convert.ToInt32(Console.ReadLine()) - 1;
+                displayMenu();
+            }
+            if (mode == Mode.TwoArguments)
+            {
+                pack.mode = mode;
+                Console.Write("Give an operand x: ");
+                
+                pack.number1 = Convert.ToInt32(Console.ReadLine());
+                equation += pack.number1;
+
+                Console.WriteLine("Choose operation:\n1.Addition\n2.Substraction\n3.Multiplication\n4.Division\n5.Linear Function\n6.Log\n7.Average\n8.Equals");
+                pack.operation = (Operation)Convert.ToInt32(Console.ReadLine()) - 1;
+
+                Console.Write("Give an operand y: ");
+                pack.number2 = Convert.ToInt32(Console.ReadLine());
+                equation += pack.number2+ " =";
+            }
+            else if (mode == Mode.MultiArguments)
+            {
+                pack.mode = mode;
+                Console.Write("Give an operand x: ");
+                pack.number1 = Convert.ToInt32(Console.ReadLine());
+                pack.number2 = 0;
+                Console.WriteLine("Choose operation:\n1.Addition\n2.Substraction\n3.Multiplication\n4.Division\n5.Equals");
+                pack.operation = (Operation)Convert.ToInt32(Console.ReadLine())-1;
+                if (pack.operation == Operation.LinearFunction)
+                {
+                    pack.operation = Operation.Equals;
+                    pack.mode = mode = Mode.MultiArgumentsLP;
+                }
+            }
+            pack.state = State.Nothing;
+            //ustalanie id
+
             Console.WriteLine("Send number");
-//>>>>>>> ceb62c61b28e6ce024e217973884b8290d21b82d
             try
             {
                 clientSocket.Send(pack.GetBytes());
@@ -233,6 +146,33 @@ namespace ProjectTS
                 Console.WriteLine(ex.ToString());
                 isConnected = false;
             }
+        }
+    }
+    public class Menu
+    {
+        public Mode mode;
+        public Operation operation;
+        string _equation = " ";
+        public string equation
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+            }
+            set
+            {
+                _equation = value + " ";
+                Display();
+            }
+        }
+
+        List<string> operands = new List<string>(new string[] { " + ", " - ", " * ", " / ", " - ", " ", " ", " ",});
+
+        private void Display()
+        {
+            Console.Clear();
+            Console.WriteLine("Mode: " + mode.ToString());
+            Console.WriteLine(_equation);
         }
     }
 }

@@ -139,7 +139,7 @@ namespace ProjectTS
             Add(number1);
             Add(number2);
             Add(state);
-            Add(Convert.ToByte(sessionId));
+            Add(Convert.ToByte(5));
             Add(mode); //na takiej zasadzie + trzeba dodać logikę 
         }
 
