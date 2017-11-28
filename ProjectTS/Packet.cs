@@ -41,7 +41,6 @@ namespace ProjectTS
     public class Packet
     {
         BitArray bitArr;
-        int index = 0;
 
         Operation operation;
         int number1 = 0;
@@ -87,7 +86,7 @@ namespace ProjectTS
         {
             var result = new int[1];
             BitArray tmp = new BitArray(32, false);
-            for (int i = 0; i < length; i++)
+            for (int i = length-1; i >= 0 ; i--)
             {
                 tmp[i] = getBit();
             }
@@ -97,9 +96,13 @@ namespace ProjectTS
 
         private bool getBit()
         {
-            bool value = bitArr[index];
-            index++;
-            return value;
+            if (index % 8 == 0)
+            {
+                byteIndex++;
+                index = byteIndex * 8;
+            }
+            index--;
+            return bitArr[index];
         }
 
         #endregion
@@ -108,23 +111,30 @@ namespace ProjectTS
 
         public void Serialize()
         {
-            Add(operation);
-            Add(number1);
-            Add(number2);
-            Add(state);
-            Add(Convert.ToByte(sessionId));
-            Add(mode); //na takiej zasadzie + trzeba dodać logikę 
+            Add(Operation.Substraction);
+            Add(Int32.MaxValue);
+            Add(100);
+            Add(State.OutOfRange);
+            Add(Convert.ToByte(5));
+            Add(Mode.TwoArguments); //na takiej zasadzie + trzeba dodać logikę 
         }
 
+        int index = 0;
+        int byteIndex = 0;
         private void Add(bool value)
         {
+            if (index % 8 == 0)
+            {
+                byteIndex++;
+                index = byteIndex * 8;
+            }
+            index--;
             bitArr.Set(index, value);
-            index++;
         }
 
         private void Add(byte value)
         {
-            for (int i = 0; i < 8; i++)
+            for (int i = 7; i >= 0; i--)
             {
                 this.Add((value & (1 << i)) != 0);
             }
@@ -134,7 +144,7 @@ namespace ProjectTS
         {
             foreach (byte by in BitConverter.GetBytes((int)op))
             {
-                for (int i = 0; i < 3; i++)
+                for (int i = 2; i >= 0; i--)
                 {
                      this.Add((by & (1 << i)) != 0);
                 }
@@ -146,7 +156,7 @@ namespace ProjectTS
         {
             foreach (byte by in BitConverter.GetBytes((int)mo))
             {
-                for (int i = 0; i < 2; i++)
+                for (int i = 1; i >= 0; i--)
                 {
                     this.Add((by & (1 << i)) != 0);
                 }
@@ -158,7 +168,7 @@ namespace ProjectTS
         {
             foreach (byte by in BitConverter.GetBytes((int)st))
             {
-                for (int i = 0; i < 2; i++)
+                for (int i = 1; i >= 0; i--)
                 {
                     this.Add((by & (1 << i)) != 0);
                 }
@@ -168,7 +178,8 @@ namespace ProjectTS
 
         private void Add(int value)
         {
-            foreach (byte by in BitConverter.GetBytes(value))
+            byte[] binary = BitConverter.GetBytes(value);
+            foreach (byte by in binary.Reverse())
             {
                 Add(by);
             }
@@ -179,9 +190,9 @@ namespace ProjectTS
         public byte[] GetBytes()
         {
             this.Serialize();
-            byte[] ret = new byte[(bitArr.Length - 1) / 8 + 1];
-            bitArr.CopyTo(ret, 0);
-            return ret;
+            byte[] binary = new byte[(bitArr.Length - 1) / 8 + 1];
+            bitArr.CopyTo(binary, 0);
+            return binary;
         }
     }
 }

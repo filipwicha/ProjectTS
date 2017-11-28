@@ -72,6 +72,7 @@ namespace ProjectTS
             Console.WriteLine("Client received data");
         }
 
+
         private void SendData()
         {
             Packet pack = new Packet();
