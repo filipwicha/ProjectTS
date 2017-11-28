@@ -24,7 +24,7 @@ namespace ProjectTS
         Substraction = 0b001,
         Multiplication = 0b010,
         Division = 0b011,
-        Sqrt = 0b100,
+        LinearFunction = 0b100,
         Log = 0b101,
         Average = 0b110,
         Equals = 0b111
@@ -52,14 +52,12 @@ namespace ProjectTS
     {
         BitArray bitArr;
 
-//>>>>>>> ceb62c61b28e6ce024e217973884b8290d21b82d
-        Operation operation;
-        int number1 = 0;
-        int number2 = 0;
-        State state = State.Nothing;
-        int sessionId;
-        Mode mode;
-        
+        public Operation operation;
+        public int number1 = 0;
+        public int number2 = 0;
+        public State state = State.Nothing;
+        public int sessionId;
+        public Mode mode;
 
         public Packet()
         {
@@ -107,60 +105,7 @@ namespace ProjectTS
             mode = (Mode)GetInt(2);
         }
 
-//<<<<<<< HEAD
-        #region Deserialization
-
-        public void Deserialize()
-        {
-
-        }
-
-
-
-
-        //public void Deserialize()
-        //{
-        //    index = 0;
-        //    //deserializowanie pola operation
-        //    for (int i = 0; i < operation.Length; i++)
-        //    {
-        //        operation[i] = bitArr[index];
-        //        index++;
-        //    }
-
-        //    //deserializowanie pola number1
-        //    GetInt();
-
-        //    //deserializowanie pola number2
-        //    GetInt();
-
-        //    //deserializowanie pola status
-        //    for (int i = 0; i < status.Length; i++)
-        //    {
-        //        status[i] = bitArr[index];
-        //        index++;
-        //    }
-
-        //    //deserializowanie pola id
-        //    for (int i = 0; i < id.Length; i++)
-        //    {
-        //        id[i] = bitArr[index];
-        //        index++;
-        //    }
-
-        //    //deserializowanie pola state
-        //    for (int i = 0; i < state.Length; i++)
-        //    {
-        //        state[i] = bitArr[index];
-        //        index++;
-        //    }
-        //}
-
-        // funkcje do deserializacji
-        public void GetInt(); //boo oznacza czy jest to number1 (false) czy number2 (true)
-//=======
         private int GetInt(int length)
-//>>>>>>> ceb62c61b28e6ce024e217973884b8290d21b82d
         {
             var result = new int[1];
             BitArray tmp = new BitArray(32, false);
@@ -189,12 +134,12 @@ namespace ProjectTS
 
         public void Serialize()
         {
-            Add(Operation.Substraction);
-            Add(Int32.MaxValue);
-            Add(100);
-            Add(State.OutOfRange);
-            Add(Convert.ToByte(5));
-            Add(Mode.TwoArguments); //na takiej zasadzie + trzeba dodać logikę 
+            Add(operation);
+            Add(number1);
+            Add(number2);
+            Add(state);
+            Add(Convert.ToByte(sessionId));
+            Add(mode); //na takiej zasadzie + trzeba dodać logikę 
         }
 
         int index = 0;

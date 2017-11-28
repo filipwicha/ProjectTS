@@ -19,9 +19,9 @@ namespace ProjectTS
         Socket serverSocket;
         Socket clientSocket;
         
-        public int buff = 0;
-        public int op = 1; //(1 - dodawanie, 2 - odejmowanie, 3 - mnozenie, 4 - dzielenie, 5 - rowna się)
-        public int st = 0; //0-nothing, 1 divby0, 2 outofrange, 3 notdefined,
+        public int result = 0;
+        Operation operation = Operation.Addition;
+        State state = State.Nothing; //0-nothing, 1 divby0, 2 outofrange, 3 notdefined,
 
         public void Startup()
         {
@@ -66,163 +66,78 @@ namespace ProjectTS
                 var bytesrecd = clientSocket.Receive(buffer);
                 Packet pack = new Packet(buffer);
 
-                if(pack.mode = TwoArguments)
+                if(pack.mode == Mode.TwoArguments)
                 {
                     switch (pack.operation)
                     {
-                        case Addition:
-                            buff = pack.number1 + pack.number2;
+                        case Operation.Addition:
+                            result = pack.number1 + pack.number2;
                             break;
-                        case Substraction:
-                            buff = pack.number1 - pack.number2;
+                        case Operation.Substraction:
+                            result = pack.number1 - pack.number2;
                             break;
-                        case Multiplication:
-                            buff = pack.number1 * pack.number2;
+                        case Operation.Multiplication:
+                            result = pack.number1 * pack.number2;
                             break;
-                        case Division:
+                        case Operation.Division:
                             if (pack.number2==0)
                             {
-                                pack.state = DivisionByZero;
+                                pack.state = State.DivisionByZero;
                                 break;
                             }
-                            buff = pack.number1 / pack.number2;
+                            result = pack.number1 / pack.number2;
                             break;
-                        case Sqrt:
-                            buff = Convert.ToInt32(Math.Sqrt(pack.number1, pack.number2));
+                        case Operation.LinearFunction:
+                            if (pack.number1 == 0)
+                            {
+                                pack.state = State.DivisionByZero;
+                                break;
+                            }
+                            result = (-pack.number2) / pack.number1;
                             break;
-                        case Log:
-                            buff = Convert.ToInt32(Math.Log(pack.number1, pack.number2));
+                        case Operation.Log:
+                            result = Convert.ToInt32(Math.Log(pack.number1, pack.number2));
                             break;
-                        case Average:
-                            buff = ((pack.number1 + pack.number2)/2);
+                        case Operation.Average:
+                            result = ((pack.number1 + pack.number2)/2);
                             break;
-                        case Equals:
-                            if (pack.number1 == pack.number2) buff = 1;
-                            else buff = 0;
+                        case Operation.Equals:
+                            if (pack.number1 == pack.number2) result = 1;
+                            else result = 0;
                             break;
                     }
                 }
-                else if (pack.mode == MultiArguments)
+                else if (pack.mode == Mode.MultiArguments)
                 {
-                    if (op == 1)
+                    operation = pack.operation;
+                    switch (operation)
                     {
-                        buff += pack.number1;
-                        switch(pack.operation)
-                        {
-                            case Addition:
-                                op = 1;
-                                break;
-                            case Substraction:
-                                op = 2;
-                                break;
-                            case Multiplication:
-                                op = 3;
-                                break;
-                            case Division:
-                                op = 4;
-                                break;
-                            case Equals:
-                                pack.mode = MultiArgumentsLP;
-                                op = 5;
-                                break;
-                        }
-                    }
-                    if (op == 2)
-                    {
-                        buff -= pack.number1;
-                        switch(pack.operation)
-                        {
-                            case Addition:
-                                op = 1;
-                                break;
-                            case Substraction:
-                                op = 2;
-                                break;
-                            case Multiplication:
-                                op = 3;
-                                break;
-                            case Division:
-                                op = 4;
-                                break;
-                            case Equals:
-                                pack.mode = MultiArgumentsLP;
-                                op = 5;
-                                break;
-                        }
-
-                    }
-                    if (op == 3)
-                    {
-                        buff *= pack.number1;
-                        switch(pack.operation)
-                        {
-                            case Addition:
-                                op = 1;
-                                break;
-                            case Substraction:
-                                op = 2;
-                                break;
-                            case Multiplication:
-                                op = 3;
-                                break;
-                            case Division:
-                                op = 4;
-                                break;
-                            case Equals:
-                                pack.mode = MultiArgumentsLP;
-                                op = 5;
-                                break;
-                        }
-                    }
-                    if (op == 4)
-                    {
-                        if(pack.number2 == 0)
-                        {
-                            st = 1;
-                        }
-                        else
-                        {
-                            buff /= pack.number1;
-                            switch(pack.operation)
-                        {
-                            case Addition:
-                                op = 1;
-                                break;
-                            case Substraction:
-                                op = 2;
-                                break;
-                            case Multiplication:
-                                op = 3;
-                                break;
-                            case Division:
-                                op = 4;
-                                break;
-                            case Equals:
-                                op = 5;
-                                pack.mode = MultiArgumentsLP;
-                                break;
-                        }
-                        }
+                        case Operation.Addition:
+                            result += pack.number1;
+                            break;
+                        case Operation.Substraction:
+                            result -= pack.number1;
+                            break;
+                        case Operation.Multiplication:
+                            result *= pack.number1;
+                            break;
+                        case Operation.Division:
+                            result /= pack.number1;
+                            if (pack.number2 == 0)
+                            {
+                                state = State.DivisionByZero;
+                            }
+                            else
+                            {
+                                result /= pack.number1;
+                            }
+                            break;
                     }
                 }
-                else if (pack.mode == MultiArgumentsLP)
+                else if (pack.mode == Mode.MultiArgumentsLP)
                 {
                     
                 }
-
-
-
-
-
-
-
-
-
-
-
-
-                
-                Packet packet = new Packet(buffer);
             }
             catch (Exception ex)
             {
@@ -233,31 +148,14 @@ namespace ProjectTS
 
         public void SendData()
         {
-            Packet pack = new Packet(100);
-            pack.operation = Addition;
-            pack.number1 = buff;
-            pack.number2 = 0;
-            switch(st)
-            {
-                case 0:
-                    pack.state = Nothing;
-                    break;
-                case 1:
-                    pack.state = DivisionByZero;
-                    break;
-                case 2:
-                    pack.state = OutOfRange;
-                    break;
-                case 3:
-                    pack.state = NotDefined;
-                    break;
-                
-            }
-            //pack.id = ...........;
-            pack.mode = NotDefined;
-
-            
             Packet pack = new Packet();
+            pack.operation = Operation.Addition;
+            pack.number1 = result;
+            pack.number2 = 0;
+            pack.state = state;
+            //pack.id = ...........;
+            pack.mode = Mode.NotDefined;
+            
             try
             {
                 clientSocket.Send(pack.GetBytes());
