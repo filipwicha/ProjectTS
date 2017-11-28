@@ -13,6 +13,8 @@ namespace ProjectTS
         const string DEFAULT_SERVER = "localhost";
         const int DEFAULT_PORT = 804;
 
+        bool isConnected = false;
+
         //Server socket stuff
         Socket serverSocket;
         Socket clientSocket;
@@ -25,42 +27,34 @@ namespace ProjectTS
 
         public void Startup()
         {
-            // The chat server always starts up on the localhost, using the default port 
             IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
             IPAddress serverAddr = hostInfo.AddressList[1];
-            var serverEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
-            // Create a listener socket and bind it to the endpoint 
+
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            serverSocket.Bind(serverEndPoint);
+            serverSocket.Bind(new IPEndPoint(serverAddr, DEFAULT_PORT));
 
             Console.WriteLine("Server started at:" + serverSocket.LocalEndPoint.ToString());
-        }
 
-        public void Listen()
-        {
-            int backlog = 0;
+            int backlog = 0; //how many pending connections the queue will hold
+
             try
             {
                 serverSocket.Listen(backlog);
                 Console.WriteLine("Server listening");
                 clientSocket = serverSocket.Accept();
+                isConnected = true;
                 Console.WriteLine("Client connected");
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Failed to listen" + ex.ToString());
             }
-        }
-
-        public bool Disconnect()
-        {
-            clientSocket.Close();
-            return true;
+            this.Run();
         }
 
         public void Run()
         {
-            while (true)
+            while (isConnected)
             {
                 ReceiveData();
                 SendData();
@@ -232,14 +226,14 @@ namespace ProjectTS
 
                 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
             Console.WriteLine("Server received packet");
         }
 
-        public bool SendData()
+        public void SendData()
         {
             Packet pack = new Packet(100);
             pack.operation = Addition;
@@ -272,9 +266,8 @@ namespace ProjectTS
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                return false;
+                isConnected = false;
             }
-            return true;
         }
     }
 }

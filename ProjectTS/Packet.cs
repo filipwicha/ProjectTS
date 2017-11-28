@@ -53,33 +53,24 @@ namespace ProjectTS
         BitArray bitArr;
         int index = 0;
         int size;
-        
+
         Operation operation;
         int number1 = 0;
         int number2 = 0;
         State state = State.Nothing;
         int sessionId;
         Mode mode;
-        
 
-        public Packet(int size)
+        public Packet()
         {
-            this.size = size;
-            bitArr = new BitArray(size);
+            bitArr = new BitArray(80);
         }
 
-        /*
-        public Packet(int size, Operation operation, int number1, int number2, State state, int sessionId, Mode mode)
+        public Packet(byte[] buffer)
         {
-            this.size = size;
-            this.operation = operation;
-            this.number1 = number1;
-            this.number2 = number2;
-            this.state = state;
-            this.sessionId = sessionId;
-            this.mode = mode;
+            bitArr = new BitArray(buffer);
+            Deserialize();
         }
-        */
 
         //wytyczne
         //
@@ -91,6 +82,41 @@ namespace ProjectTS
         //pole identyfikatora o długości 8 bitów,
         //dodatkowe pola zdefiniowane przez programistę
 
+        #region Deserialization
+
+        public void Deserialize()
+        {
+            operation = (Operation)GetInt(3);
+            number1 = GetInt(32);
+            number2 = GetInt(32);
+            state = (State)GetInt(2);
+            sessionId = GetInt(8);
+            mode = (Mode)GetInt(2);
+        }
+
+        private int GetInt(int length)
+        {
+            var result = new int[1];
+            BitArray tmp = new BitArray(32, false);
+            for (int i = 0; i < length; i++)
+            {
+                tmp[i] = getBit();
+            }
+            tmp.CopyTo(result, 0);
+            return result[0];
+        }
+
+        private bool getBit()
+        {
+            bool value = bitArr[index];
+            index++;
+            return value;
+        }
+
+        #endregion
+
+        #region Serialization
+
         public void Serialize()
         {
             Add(operation);
@@ -101,88 +127,13 @@ namespace ProjectTS
             Add(mode); //na takiej zasadzie + trzeba dodać logikę 
         }
 
-        #region Deserialization
-
-        public void Deserialize()
-        {
-
-        }
-
-
-
-
-        //public void Deserialize()
-        //{
-        //    index = 0;
-        //    //deserializowanie pola operation
-        //    for (int i = 0; i < operation.Length; i++)
-        //    {
-        //        operation[i] = bitArr[index];
-        //        index++;
-        //    }
-
-        //    //deserializowanie pola number1
-        //    GetInt();
-
-        //    //deserializowanie pola number2
-        //    GetInt();
-
-        //    //deserializowanie pola status
-        //    for (int i = 0; i < status.Length; i++)
-        //    {
-        //        status[i] = bitArr[index];
-        //        index++;
-        //    }
-
-        //    //deserializowanie pola id
-        //    for (int i = 0; i < id.Length; i++)
-        //    {
-        //        id[i] = bitArr[index];
-        //        index++;
-        //    }
-
-        //    //deserializowanie pola state
-        //    for (int i = 0; i < state.Length; i++)
-        //    {
-        //        state[i] = bitArr[index];
-        //        index++;
-        //    }
-        //}
-
-        // funkcje do deserializacji
-        public void GetInt() //boo oznacza czy jest to number1 (false) czy number2 (true)
-        {
-            BitArray temp = new BitArray(32); //wycina kawałek oryginalnej tablicy z liczbą, potrzebne do konwersji
-            for (int i = 0; i < 32; i++)
-            {
-                temp[0] = bitArr[index];
-                index++;
-            }
-            int[] arr = new int[1];
-            temp.CopyTo(arr, 0);
-
-            if (index==35) //jeżeli indeks jest równy 3+32=35 po kopiowaniu tablicy, to zapisujemy do number1
-            {
-                number1 = arr[0];
-            }
-            else if(index == 67) //jeżeli indeks jest równy 3+32+32=67 po kopiowaniu tablicy, to zapisujemy do number1
-            {
-                number2 = arr[0];
-            }
-            
-        }
-
-        #endregion
-
-        #region Add methods
-
-        public void Add(bool value)
+        private void Add(bool value)
         {
             bitArr.Set(index, value);
             index++;
         }
 
-        public void Add(byte value)
+        private void Add(byte value)
         {
             for (int i = 0; i < 8; i++)
             {
@@ -190,7 +141,7 @@ namespace ProjectTS
             }
         }
 
-        public void Add(Operation op)
+        private void Add(Operation op)
         {
             foreach (byte by in BitConverter.GetBytes((int)op))
             {
@@ -202,7 +153,7 @@ namespace ProjectTS
             }
         }
 
-        public void Add(Mode mo)
+        private void Add(Mode mo)
         {
             foreach (byte by in BitConverter.GetBytes((int)mo))
             {
@@ -214,7 +165,7 @@ namespace ProjectTS
             }
         }
 
-        public void Add(State st)
+        private void Add(State st)
         {
             foreach (byte by in BitConverter.GetBytes((int)st))
             {
@@ -226,7 +177,7 @@ namespace ProjectTS
             }
         }
 
-        public void Add(int value)
+        private void Add(int value)
         {
             foreach (byte by in BitConverter.GetBytes(value))
             {

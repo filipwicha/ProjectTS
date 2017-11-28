@@ -13,7 +13,6 @@ namespace ProjectTS
         
         static void Main(string[] args)
         {
-            Console.CancelKeyPress += Console_CancelKeyPress;
             Console.WriteLine("Start as:\n1.Client\n2.Server");
             if(Convert.ToInt32(Console.ReadLine()) == 1)
             {
@@ -28,16 +27,9 @@ namespace ProjectTS
             {
                 server = new Server();
                 server.Startup();
-                server.Listen();
-                server.Run();
             }
             Console.ReadLine();
             //exit 
-        }
-
-        private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
-        {
-            Console.WriteLine("exit");
         }
     }
 }

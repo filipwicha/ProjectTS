@@ -12,25 +12,17 @@ namespace ProjectTS
     {
         const string DEFAULT_SERVER = "localhost";
         const int DEFAULT_PORT = 804;
-
-        public string flag0 = "n"; //informs about not chosen operation (n), dualoperand (d), multioperand (m), multioperandls(mls) 
-        public bool flag1 = false; //informs about multioperand operation (0 -not last sent, 1 -last sent)
-
-        bool isConnected = false;
-
+        
         //Client socket stuff 
         Socket clientSocket;
-        Socket serverSocket;
-        SocketInformation clientSocketInfo;
+        bool isConnected = false;
 
         public bool Connect()
         {
-            // The chat client always starts up on the localhost, using the default port 
             IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
             IPAddress serverAddr = hostInfo.AddressList[1];
             var clientEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
 
-            // Create a client socket and connect it to the endpoint 
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             //Try to connect to server (Timeout = 30s)
@@ -39,6 +31,7 @@ namespace ProjectTS
                 try
                 {
                     clientSocket.Connect(clientEndPoint);
+                    isConnected = true;
                     Timeout = 0;
                     isConnected = true;
                 }
