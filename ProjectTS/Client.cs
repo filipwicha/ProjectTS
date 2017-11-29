@@ -14,13 +14,11 @@ namespace ProjectTS
         const int DEFAULT_PORT = 804;
 
         Mode mode = Mode.NotDefined;
-        
-        //public bool flag1 = false; //informs about multioperand operation (0 -not last sent, 1 -last sent)
-
 
         Socket clientSocket;
         bool isConnected = false;
 
+        List<string> operands = new List<string>(new string[] { "+", "-", "*", "/", "x +", "log", "average", "==", "=",});
         string _equation = "";
         string equation
         {
@@ -34,8 +32,6 @@ namespace ProjectTS
                 displayMenu();
             }
         }
-        List<string> operands = new List<string>(new string[] { "+", "-", "*", "/", "x +", "log", "average", "==", "=",});
-
 
         public bool Connect()
         {
@@ -124,65 +120,76 @@ namespace ProjectTS
 
         private void SendData()
         {
-            Packet pack = new Packet();
-            if (mode == Mode.NotDefined)
+            bool Error = true;
+            do
             {
-                Console.WriteLine("Choose the method:\n1.Two argument\n2.Multiargument\n");
-                mode = (Mode)Convert.ToInt32(Console.ReadLine()) - 1;
-                displayMenu();
-            }
-            if (mode == Mode.TwoArguments)
-            {
-                pack.mode = mode;
-
-                Console.Write("Give an operand x: ");
-                pack.number1 = Convert.ToInt32(Console.ReadLine());
-                equation = pack.number1.ToString();
-
-                Console.WriteLine("Choose operation:\n1.Addition\n2.Substraction\n3.Multiplication\n4.Division\n5.Linear Function\n6.Log\n7.Average\n8.Equals");
-                pack.operation = (Operation)Convert.ToInt32(Console.ReadLine()) - 1;
-                equation += operands[(int)pack.operation];
-
-                Console.Write("Give an operand y: ");
-                pack.number2 = Convert.ToInt32(Console.ReadLine());
-                equation += pack.number2 +" "+ operands[8];
-            }
-            else if (mode == Mode.MultiArguments)
-            {
-                pack.mode = mode;
-
-                Console.Write("Give an operand x: ");
-                pack.number1 = Convert.ToInt32(Console.ReadLine());
-                equation += pack.number1;
-
-                pack.number2 = 0;
-
-                Console.WriteLine("Choose operation:\n1.Addition\n2.Substraction\n3.Multiplication\n4.Division\n5.Equals");
-                pack.operation = (Operation)Convert.ToInt32(Console.ReadLine())-1;
-
-                if (pack.operation == Operation.LinearFunction)
+                Packet pack = new Packet();
+                try
                 {
-                    equation += operands[8];
-                    pack.operation = Operation.Equals;
-                    pack.mode = mode = Mode.MultiArgumentsLP;
-                }
-                else
-                {
-                    equation += operands[(int)pack.operation];
-                }
-            }
-            pack.state = State.Nothing;
-            //ustalanie id
+                    if (mode == Mode.NotDefined)
+                    {
+                        Console.WriteLine("Choose the method:\n1.Two argument\n2.Multiargument\n");
+                        mode = (Mode)Convert.ToInt32(Console.ReadLine()) - 1;
+                        displayMenu();
+                    }
+                    if (mode == Mode.TwoArguments)
+                    {
+                        pack.mode = mode;
+                        Console.Write("Give an operand x: ");
+                        pack.number1 = Convert.ToInt32(Console.ReadLine());
+                        equation = pack.number1.ToString();
 
-            try
-            {
-                clientSocket.Send(pack.GetBytes());
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                isConnected = false;
-            }
+                        Console.WriteLine("Choose operation:\n1.Addition\n2.Substraction\n3.Multiplication\n4.Division\n5.Linear Function\n6.Log\n7.Average\n8.Equals");
+                        pack.operation = (Operation)Convert.ToInt32(Console.ReadLine()) - 1;
+                        equation += operands[(int)pack.operation];
+
+                        Console.Write("Give an operand y: ");
+                        pack.number2 = Convert.ToInt32(Console.ReadLine());
+                        equation += pack.number2 + " " + operands[8];
+                    }
+                    else if (mode == Mode.MultiArguments)
+                    {
+                        pack.mode = mode;
+
+                        Console.Write("Give an operand x: ");
+                        pack.number1 = Convert.ToInt32(Console.ReadLine());
+                        equation += pack.number1;
+
+                        pack.number2 = 0;
+
+                        Console.WriteLine("Choose operation:\n1.Addition\n2.Substraction\n3.Multiplication\n4.Division\n5.Equals");
+                        pack.operation = (Operation)Convert.ToInt32(Console.ReadLine()) - 1;
+
+                        if (pack.operation == Operation.LinearFunction)
+                        {
+                            equation += operands[8];
+                            pack.operation = Operation.Equals;
+                            pack.mode = mode = Mode.MultiArgumentsLP;
+                        }
+                        else
+                        {
+                            equation += operands[(int)pack.operation];
+                        }
+                    }
+                    pack.state = State.Nothing;
+                    //ustalanie id
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    continue;
+                }
+                try
+                {
+                    clientSocket.Send(pack.GetBytes());
+                    Error = false;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    isConnected = false;
+                }
+            } while (Error);
         }
     }
 }
