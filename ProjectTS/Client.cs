@@ -61,10 +61,8 @@ namespace ProjectTS
                 }
             }
             Console.WriteLine("Connected to " + clientSocket.LocalEndPoint.ToString());
-            Packet pack = new Packet();
-            pack.sessionId = currentSessionId = 211;
-            clientSocket.Send(pack.GetBytes());
-            
+            GetSessionId();
+
             return true;
         }
 
@@ -92,6 +90,22 @@ namespace ProjectTS
             Console.Clear();
             Console.WriteLine("Mode: " + mode.ToString());
             Console.WriteLine(_equation);
+        }
+
+        void GetSessionId()
+        {
+            byte[] buffer = new byte[256];
+            try
+            {
+                var bytesrecd = clientSocket.Receive(buffer);
+                Packet pack = new Packet(buffer);
+                currentSessionId = pack.sessionId;
+                Console.WriteLine("Session ID is set: " + currentSessionId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
 
         private void ReceiveData()

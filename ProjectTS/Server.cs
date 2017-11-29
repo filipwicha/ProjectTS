@@ -20,11 +20,11 @@ namespace ProjectTS
         //Sockets
         Socket serverSocket;
         Socket clientSocket;
-        
+
+        int currentSessionId;
         public int result = 0;
         Operation operation = Operation.Addition;
         State state = State.Nothing;
-        int currentSessionId;
 
         public void Startup()
         {
@@ -48,21 +48,9 @@ namespace ProjectTS
             {
                 Console.WriteLine("Failed to listen" + ex.ToString());
             }
-            byte[] buffer = new byte[256];
-            try
-            {
-                var bytesrecd = clientSocket.Receive(buffer);
-                Packet pack = new Packet(buffer);
-                currentSessionId = pack.sessionId;
-                Console.WriteLine("Session ID is set");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
+            SetSessionId();
 
             this.Run();
-            
         }
 
         public void Run()
@@ -73,6 +61,15 @@ namespace ProjectTS
                 SendData();
             }
         }
+
+        void SetSessionId()
+        {
+            Packet pack = new Packet();
+            pack.sessionId = currentSessionId = 7;
+            clientSocket.Send(pack.GetBytes());
+            Console.WriteLine("Session ID is set: " + currentSessionId);
+        }
+
 
         public void ReceiveData()
         {
