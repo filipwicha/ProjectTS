@@ -82,14 +82,6 @@ namespace ProjectTS
                 {
                     return;
                 }
-                else if(mode == Mode.TwoArguments)
-                {
-                    Console.WriteLine("One more operation?\n1.Yes\n2.No\n");
-                    if (Convert.ToInt32(Console.ReadLine()) == 2)
-                    {
-                        return;
-                    }
-                }
             }
         }
 
