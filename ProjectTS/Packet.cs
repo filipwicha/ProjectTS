@@ -115,7 +115,7 @@ namespace ProjectTS
             Add(number1);
             Add(number2);
             Add(state);
-            Add(Convert.ToByte(5));
+            Add(Convert.ToByte(sessionId));
             Add(mode);
         }
 
