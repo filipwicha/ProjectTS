@@ -11,13 +11,13 @@ namespace ProjectTS
     public class Server
     {
         const string DEFAULT_SERVER = "localhost";
-        const int DEFAULT_PORT = 804;
+        const int DEFAULT_PORT = 211;
 
         bool isConnected = false;
 
 
 
-        //Server socket stuff
+        //Sockets
         Socket serverSocket;
         Socket clientSocket;
         
@@ -27,8 +27,7 @@ namespace ProjectTS
 
         public void Startup()
         {
-            IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
-            IPAddress serverAddr = hostInfo.AddressList[1];
+            IPAddress serverAddr = IPAddress.Parse("25.21.58.123");
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverSocket.Bind(new IPEndPoint(serverAddr, DEFAULT_PORT));
 
@@ -134,6 +133,10 @@ namespace ProjectTS
                                     result /= pack.number1;
                                 }
                                 break;
+                        }
+                        if(pack.operation == Operation.Equals)
+                        {
+                            isConnected = false;
                         }
                         operation = pack.operation;
                     }

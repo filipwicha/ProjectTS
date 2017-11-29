@@ -10,8 +10,7 @@ namespace ProjectTS
 {
     public class Client
     {
-        const string DEFAULT_SERVER = "localhost";
-        const int DEFAULT_PORT = 804;
+        const int DEFAULT_PORT = 211;
 
         Mode mode = Mode.NotDefined;
 
@@ -35,12 +34,9 @@ namespace ProjectTS
 
         public bool Connect()
         {
-            IPHostEntry hostInfo = Dns.GetHostEntry(DEFAULT_SERVER);
-            IPAddress serverAddr = hostInfo.AddressList[1];
+            IPAddress serverAddr = IPAddress.Parse("25.21.58.123");
             var clientEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
-
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
             //Try to connect to server (Timeout = 30s)
             int Timeout = 6;
             while(Timeout>0){
@@ -68,7 +64,7 @@ namespace ProjectTS
 
         public bool Disconnect()
         {
-            clientSocket.Close();
+            clientSocket.Disconnect(false);
             return true;
         }
 

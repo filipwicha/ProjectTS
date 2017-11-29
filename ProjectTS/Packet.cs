@@ -51,7 +51,7 @@ namespace ProjectTS
     public class Packet
     {
         BitArray bitArr;
-
+        
         public Operation operation;
         public int number1 = 0;
         public int number2 = 0;
