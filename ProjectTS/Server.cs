@@ -15,8 +15,6 @@ namespace ProjectTS
 
         bool isConnected = false;
 
-
-
         //Sockets
         Socket serverSocket;
         Socket clientSocket;
@@ -132,6 +130,10 @@ namespace ProjectTS
                                 result = checked( result / pack.number1);
                             }
                             break;
+                    }
+                    if(pack.operation == Operation.Equals)
+                    {
+                        isConnected = false;
                     }
                     operation = pack.operation;
                 }

@@ -29,7 +29,6 @@ namespace ProjectTS
                 server.Startup();
             }
             Console.ReadLine();
-            //exit 
         }
     }
 }
