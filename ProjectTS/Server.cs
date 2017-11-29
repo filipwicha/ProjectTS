@@ -24,10 +24,11 @@ namespace ProjectTS
         public int result = 0;
         Operation operation = Operation.Addition;
         State state = State.Nothing;
+        int currentSessionId;
 
         public void Startup()
         {
-            IPAddress serverAddr = IPAddress.Parse("25.21.58.123");
+            IPAddress serverAddr = IPAddress.Parse("127.0.0.1");
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverSocket.Bind(new IPEndPoint(serverAddr, DEFAULT_PORT));
 
@@ -47,7 +48,21 @@ namespace ProjectTS
             {
                 Console.WriteLine("Failed to listen" + ex.ToString());
             }
+            byte[] buffer = new byte[256];
+            try
+            {
+                var bytesrecd = clientSocket.Receive(buffer);
+                Packet pack = new Packet(buffer);
+                currentSessionId = pack.sessionId;
+                Console.WriteLine("Session ID is set");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
             this.Run();
+            
         }
 
         public void Run()
@@ -155,7 +170,7 @@ namespace ProjectTS
             pack.number1 = result;
             pack.number2 = 0;
             pack.state = state;
-            //pack.id = ...........;
+            pack.sessionId = currentSessionId;
             pack.mode = Mode.NotDefined;
             
             try

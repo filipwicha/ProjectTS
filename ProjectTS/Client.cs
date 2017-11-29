@@ -13,9 +13,11 @@ namespace ProjectTS
         const int DEFAULT_PORT = 211;
 
         Mode mode = Mode.NotDefined;
+        int currentSessionId;
 
         Socket clientSocket;
         bool isConnected = false;
+
 
         List<string> operands = new List<string>(new string[] { "+", "-", "*", "/", "x +", "log", "average", "==", "=",});
         string _equation = "";
@@ -34,7 +36,7 @@ namespace ProjectTS
 
         public bool Connect()
         {
-            IPAddress serverAddr = IPAddress.Parse("25.21.58.123");
+            IPAddress serverAddr = IPAddress.Parse("127.0.0.1");
             var clientEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             //Try to connect to server (Timeout = 30s)
@@ -59,6 +61,10 @@ namespace ProjectTS
                 }
             }
             Console.WriteLine("Connected to " + clientSocket.LocalEndPoint.ToString());
+            Packet pack = new Packet();
+            pack.sessionId = currentSessionId = 211;
+            clientSocket.Send(pack.GetBytes());
+            
             return true;
         }
 
@@ -168,7 +174,7 @@ namespace ProjectTS
                         }
                     }
                     pack.state = State.Nothing;
-                    //ustalanie id
+                    pack.sessionId = currentSessionId;
                 }
                 catch (Exception ex)
                 {
