@@ -15,6 +15,8 @@ namespace ProjectTS
 
         bool isConnected = false;
 
+
+
         //Server socket stuff
         Socket serverSocket;
         Socket clientSocket;
@@ -65,74 +67,80 @@ namespace ProjectTS
             {
                 var bytesrecd = clientSocket.Receive(buffer);
                 Packet pack = new Packet(buffer);
-                
-                if(pack.mode == Mode.TwoArguments)
+                try
                 {
-                    state = State.Nothing;
-                    switch (pack.operation)
+                    if (pack.mode == Mode.TwoArguments)
                     {
-                        case Operation.Addition:
-                            result = pack.number1 + pack.number2;
-                            break;
-                        case Operation.Substraction:
-                            result = pack.number1 - pack.number2;
-                            break;
-                        case Operation.Multiplication:
-                            result = pack.number1 * pack.number2;
-                            break;
-                        case Operation.Division:
-                            if (pack.number2==0)
-                            {
-                                state = State.DivisionByZero;
+                        state = State.Nothing;
+                        switch (pack.operation)
+                        {
+                            case Operation.Addition:
+                                result = checked(pack.number1 + pack.number2);
                                 break;
-                            }
-                            result = pack.number1 / pack.number2;
-                            break;
-                        case Operation.LinearFunction:
-                            if (pack.number1 == 0)
-                            {
-                                state = State.DivisionByZero;
+                            case Operation.Substraction:
+                                result = pack.number1 - pack.number2;
                                 break;
-                            }
-                            result = (-pack.number2) / pack.number1;
-                            break;
-                        case Operation.Log:
-                            result = Convert.ToInt32(Math.Log(pack.number1, pack.number2));
-                            break;
-                        case Operation.Average:
-                            result = ((pack.number1 + pack.number2)/2);
-                            break;
-                        case Operation.Equals:
-                            if (pack.number1 == pack.number2) result = 1;
-                            else result = 0;
-                            break;
+                            case Operation.Multiplication:
+                                result = pack.number1 * pack.number2;
+                                break;
+                            case Operation.Division:
+                                if (pack.number2 == 0)
+                                {
+                                    state = State.DivisionByZero;
+                                    break;
+                                }
+                                result = pack.number1 / pack.number2;
+                                break;
+                            case Operation.LinearFunction:
+                                if (pack.number1 == 0)
+                                {
+                                    state = State.DivisionByZero;
+                                    break;
+                                }
+                                result = (-pack.number2) / pack.number1;
+                                break;
+                            case Operation.Log:
+                                result = Convert.ToInt32(Math.Log(pack.number1, pack.number2));
+                                break;
+                            case Operation.Average:
+                                result = ((pack.number1 + pack.number2) / 2);
+                                break;
+                            case Operation.Equals:
+                                if (pack.number1 == pack.number2) result = 1;
+                                else result = 0;
+                                break;
+                        }
+                    }
+                    else if (pack.mode == Mode.MultiArguments || pack.mode == Mode.MultiArgumentsLP)
+                    {
+                        switch (operation)
+                        {
+                            case Operation.Addition:
+                                result += pack.number1;
+                                break;
+                            case Operation.Substraction:
+                                result -= pack.number1;
+                                break;
+                            case Operation.Multiplication:
+                                result *= pack.number1;
+                                break;
+                            case Operation.Division:
+                                if (pack.number1 == 0)
+                                {
+                                    state = State.DivisionByZero;
+                                }
+                                else
+                                {
+                                    result /= pack.number1;
+                                }
+                                break;
+                        }
+                        operation = pack.operation;
                     }
                 }
-                else if (pack.mode == Mode.MultiArguments || pack.mode == Mode.MultiArgumentsLP )
+                catch (System.OverflowException e)
                 {
-                    switch (operation)
-                    {
-                        case Operation.Addition:
-                            result += pack.number1;
-                            break;
-                        case Operation.Substraction:
-                            result -= pack.number1;
-                            break;
-                        case Operation.Multiplication:
-                            result *= pack.number1;
-                            break;
-                        case Operation.Division:
-                            if (pack.number1 == 0)
-                            {
-                                state = State.DivisionByZero;
-                            }
-                            else
-                            {
-                                result /= pack.number1;
-                            }
-                            break;
-                    }
-                    operation = pack.operation;
+                    state = State.OverFlow;
                 }
             }
             catch (Exception ex)

@@ -42,7 +42,7 @@ namespace ProjectTS
     {
         Nothing = 0b00,
         DivisionByZero = 0b01, 
-        OutOfRange = 0b10,
+        OverFlow = 0b10,
         NotDefined = 0b11
     }
 

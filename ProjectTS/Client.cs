@@ -116,7 +116,7 @@ namespace ProjectTS
                 case State.DivisionByZero:
                     equation = "Division by 0";
                     break;
-                case State.OutOfRange:
+                case State.OverFlow:
                     equation = "Out of range" + pack.number1;
                     break;
             }
