@@ -70,30 +70,6 @@ namespace ProjectTS
             Deserialize();
         }
 
-        
-        /*
-        public Packet(int size, Operation operation, int number1, int number2, State state, int sessionId, Mode mode)
-        {
-            this.size = size;
-            this.operation = operation;
-            this.number1 = number1;
-            this.number2 = number2;
-            this.state = state;
-            this.sessionId = sessionId;
-            this.mode = mode;
-        }
-        */
-
-        //wytyczne
-        //
-        //połączeniowy,
-        //wszystkie dane przesyłane w postaci binarnej,
-        //pole operacji o długości 3 bitów,
-        //pola liczb o długości 32 bitów,
-        //pole statusu o długości 2 bitów,
-        //pole identyfikatora o długości 8 bitów,
-        //dodatkowe pola zdefiniowane przez programistę
-
         #region Deserialization
 
         public void Deserialize()
@@ -140,7 +116,7 @@ namespace ProjectTS
             Add(number2);
             Add(state);
             Add(Convert.ToByte(5));
-            Add(mode); //na takiej zasadzie + trzeba dodać logikę 
+            Add(mode);
         }
 
         int index = 0;

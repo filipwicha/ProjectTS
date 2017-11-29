@@ -65,8 +65,8 @@ namespace ProjectTS
             {
                 var bytesrecd = clientSocket.Receive(buffer);
                 Packet pack = new Packet(buffer);
-                
-                if(pack.mode == Mode.TwoArguments)
+
+                if (pack.mode == Mode.TwoArguments)
                 {
                     state = State.Nothing;
                     switch (pack.operation)
@@ -81,7 +81,7 @@ namespace ProjectTS
                             result = pack.number1 * pack.number2;
                             break;
                         case Operation.Division:
-                            if (pack.number2==0)
+                            if (pack.number2 == 0)
                             {
                                 state = State.DivisionByZero;
                                 break;
@@ -100,7 +100,7 @@ namespace ProjectTS
                             result = Convert.ToInt32(Math.Log(pack.number1, pack.number2));
                             break;
                         case Operation.Average:
-                            result = ((pack.number1 + pack.number2)/2);
+                            result = ((pack.number1 + pack.number2) / 2);
                             break;
                         case Operation.Equals:
                             if (pack.number1 == pack.number2) result = 1;
@@ -108,7 +108,7 @@ namespace ProjectTS
                             break;
                     }
                 }
-                else if (pack.mode == Mode.MultiArguments || pack.mode == Mode.MultiArgumentsLP )
+                else if (pack.mode == Mode.MultiArguments || pack.mode == Mode.MultiArgumentsLP)
                 {
                     switch (operation)
                     {
@@ -134,12 +134,12 @@ namespace ProjectTS
                     }
                     operation = pack.operation;
                 }
+                Console.WriteLine("Server received packet");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
-            Console.WriteLine("Server received packet");
         }
 
         public void SendData()
