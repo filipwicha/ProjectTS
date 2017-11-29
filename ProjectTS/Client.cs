@@ -36,7 +36,7 @@ namespace ProjectTS
 
         public bool Connect()
         {
-            IPAddress serverAddr = IPAddress.Parse("127.0.0.1");
+            IPAddress serverAddr = IPAddress.Parse("25.21.58.123");
             var clientEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             //Try to connect to server (Timeout = 30s)

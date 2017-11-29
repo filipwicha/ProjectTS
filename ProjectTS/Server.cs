@@ -26,7 +26,7 @@ namespace ProjectTS
 
         public void Startup()
         {
-            IPAddress serverAddr = IPAddress.Parse("127.0.0.1");
+            IPAddress serverAddr = IPAddress.Parse("25.21.58.123");
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverSocket.Bind(new IPEndPoint(serverAddr, DEFAULT_PORT));
 
