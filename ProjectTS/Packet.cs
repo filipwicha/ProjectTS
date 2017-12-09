@@ -5,16 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-//wytyczne
-//
-//połączeniowy,
-//wszystkie dane przesyłane w postaci binarnej,
-//pole operacji o długości 3 bitów,
-//pola liczb o długości 32 bitów,
-//pole statusu o długości 2 bitów,
-//pole identyfikatora o długości 8 bitów,
-//dodatkowe pola zdefiniowane przez programistę
-
 namespace ProjectTS
 {
     #region Enums
@@ -50,7 +40,7 @@ namespace ProjectTS
 
     public class Packet
     {
-        BitArray bitArr;
+        BitArray bitArr; //temporary array of bits
         
         public Operation operation;
         public int number1 = 0;
@@ -61,7 +51,7 @@ namespace ProjectTS
 
         public Packet()
         {
-            bitArr = new BitArray(80);
+            bitArr = new BitArray(80); //constructor, that sets the bitarray with 80 bits
         }
 
         public Packet(byte[] buffer)
@@ -82,7 +72,7 @@ namespace ProjectTS
             mode = (Mode)GetInt(2);
         }
 
-        private int GetInt(int length)
+        private int GetInt(int length) //deserialize int32 and add to bitarray
         {
             var result = new int[1];
             BitArray tmp = new BitArray(32, false);
@@ -94,7 +84,7 @@ namespace ProjectTS
             return result[0];
         }
 
-        private bool getBit()
+        private bool getBit() //getter of last bit in bitarray
         {
             if (index % 8 == 0)
             {
@@ -107,7 +97,7 @@ namespace ProjectTS
 
         #endregion
 
-        #region Serialization
+        #region Serialization 
 
         public void Serialize()
         {
@@ -121,7 +111,7 @@ namespace ProjectTS
 
         int index = 0;
         int byteIndex = 0;
-        private void Add(bool value)
+        private void Add(bool value) //serialization of bool value
         {
             if (index % 8 == 0)
             {
@@ -132,7 +122,7 @@ namespace ProjectTS
             bitArr.Set(index, value);
         }
 
-        private void Add(byte value)
+        private void Add(byte value) //serialization of byte value
         {
             for (int i = 7; i >= 0; i--)
             {
@@ -140,7 +130,7 @@ namespace ProjectTS
             }
         }
 
-        private void Add(Operation op)
+        private void Add(Operation op) //serialization of Operation
         {
             foreach (byte by in BitConverter.GetBytes((int)op))
             {
@@ -152,7 +142,7 @@ namespace ProjectTS
             }
         }
 
-        private void Add(Mode mo)
+        private void Add(Mode mo) //serialization of mode
         {
             foreach (byte by in BitConverter.GetBytes((int)mo))
             {
@@ -164,7 +154,7 @@ namespace ProjectTS
             }
         }
 
-        private void Add(State st)
+        private void Add(State st) //serialization of state
         {
             foreach (byte by in BitConverter.GetBytes((int)st))
             {
@@ -176,7 +166,7 @@ namespace ProjectTS
             }
         }
 
-        private void Add(int value)
+        private void Add(int value) //serialization of int32
         {
             byte[] binary = BitConverter.GetBytes(value);
             foreach (byte by in binary.Reverse())
@@ -187,7 +177,7 @@ namespace ProjectTS
 
         #endregion
 
-        public byte[] GetBytes()
+        public byte[] GetBytes() //function that returns byte array with serialized bitarray
         {
             this.Serialize();
             byte[] binary = new byte[(bitArr.Length - 1) / 8 + 1];

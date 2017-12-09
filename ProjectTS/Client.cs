@@ -12,14 +12,14 @@ namespace ProjectTS
     {
         const int DEFAULT_PORT = 211;
 
-        Mode mode = Mode.NotDefined;
-        int currentSessionId;
+        Mode mode = Mode.NotDefined; //flag that informs which mode is in use
+        int currentSessionId; //flag that informs about current session id
+        bool isConnected = false; //flag that informs about connection
 
-        Socket clientSocket;
-        bool isConnected = false;
-
-
+        Socket clientSocket; //create client's socket
+        
         List<string> operands = new List<string>(new string[] { "+", "-", "*", "/", "x +", "log", "average", "==", "=",});
+
         string _equation = "";
         string equation
         {
@@ -36,15 +36,15 @@ namespace ProjectTS
 
         public bool Connect()
         {
-            IPAddress serverAddr = IPAddress.Parse("25.21.58.123");
-            var clientEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT);
+            IPAddress serverAddr = IPAddress.Parse("127.0.0.1"); //set IP of a server
+            var clientEndPoint = new IPEndPoint(serverAddr, DEFAULT_PORT); //set an endpoint
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             //Try to connect to server (Timeout = 30s)
             int Timeout = 6;
             while(Timeout>0){
                 try
                 {
-                    clientSocket.Connect(clientEndPoint);
+                    clientSocket.Connect(clientEndPoint); //connect to server
                     isConnected = true;
                     Timeout = 0;
                 }
@@ -61,27 +61,27 @@ namespace ProjectTS
                 }
             }
             Console.WriteLine("Connected to " + clientSocket.LocalEndPoint.ToString());
-            GetSessionId();
+            GetSessionId(); //get sessionId from server
 
             return true;
         }
 
         public bool Disconnect()
         {
-            clientSocket.Disconnect(false);
+            clientSocket.Disconnect(false); 
             return true;
         }
 
         public void Run()
         {
-            while (isConnected)
+            while (isConnected) 
             {
                 SendData();
                 ReceiveData();
                 if(mode == Mode.MultiArgumentsLP)
                 {
-                    return;
-                }
+                    return; //when server sets mode of packet as MultiArgumentsLP (that it is last packet),
+                }           //while(isConnected) stops
             }
         }
 
@@ -92,14 +92,14 @@ namespace ProjectTS
             Console.WriteLine(_equation);
         }
 
-        void GetSessionId()
+        void GetSessionId() 
         {
             byte[] buffer = new byte[256];
             try
             {
-                var bytesrecd = clientSocket.Receive(buffer);
+                var bytesrecd = clientSocket.Receive(buffer); //get firstt packet fom server
                 Packet pack = new Packet(buffer);
-                currentSessionId = pack.sessionId;
+                currentSessionId = pack.sessionId; //set current sessionId
                 Console.WriteLine("Session ID is set: " + currentSessionId);
             }
             catch (Exception ex)
@@ -111,8 +111,8 @@ namespace ProjectTS
         private void ReceiveData()
         {
             byte[] buffer = new byte[256];
-            var bytesrecd = clientSocket.Receive(buffer);
-            Packet pack = new Packet(buffer);
+            var bytesrecd = clientSocket.Receive(buffer); //receive packet from server
+            Packet pack = new Packet(buffer); //deserialize and create packet with received data
             switch (pack.state)
             {
                 case State.Nothing:
@@ -139,16 +139,16 @@ namespace ProjectTS
             bool Error = true;
             do
             {
-                Packet pack = new Packet();
+                Packet pack = new Packet(); //create packet to send
                 try
                 {
-                    if (mode == Mode.NotDefined)
+                    if (mode == Mode.NotDefined) //if mode is not defined, you firstly you have to set mode
                     {
                         Console.WriteLine("Choose the method:\n1.Two argument\n2.Multiargument\n");
                         mode = (Mode)Convert.ToInt32(Console.ReadLine()) - 1;
                         displayMenu();
                     }
-                    if (mode == Mode.TwoArguments)
+                    if (mode == Mode.TwoArguments) //if mode is set to TwoArguments get operand x, y and choose operation
                     {
                         pack.mode = mode;
                         Console.Write("Give an operand x: ");
@@ -163,7 +163,7 @@ namespace ProjectTS
                         pack.number2 = Convert.ToInt32(Console.ReadLine());
                         equation += pack.number2 + " " + operands[8];
                     }
-                    else if (mode == Mode.MultiArguments)
+                    else if (mode == Mode.MultiArguments) //if mode is set to TwoArguments get operand x and choose operation
                     {
                         pack.mode = mode;
 
@@ -187,8 +187,8 @@ namespace ProjectTS
                             equation += operands[(int)pack.operation];
                         }
                     }
-                    pack.state = State.Nothing;
-                    pack.sessionId = currentSessionId;
+                    pack.state = State.Nothing; //set state
+                    pack.sessionId = currentSessionId; //set sessionId
                 }
                 catch (Exception ex)
                 {
@@ -197,7 +197,7 @@ namespace ProjectTS
                 }
                 try
                 {
-                    clientSocket.Send(pack.GetBytes());
+                    clientSocket.Send(pack.GetBytes()); //serialize and send data to server
                     Error = false;
                 }
                 catch (Exception ex)

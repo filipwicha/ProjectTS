@@ -19,16 +19,16 @@ namespace ProjectTS
         Socket serverSocket;
         Socket clientSocket;
 
-        int currentSessionId;
-        public int result = 0;
-        Operation operation = Operation.Addition;
-        State state = State.Nothing;
+        int currentSessionId; //flag that informs about current session Id
+        public int result = 0; //variable that holds current result of calculation
+        Operation operation = Operation.Addition;   // first operation is set to addition, 
+        State state = State.Nothing;                //because the first number form first packet must be set as current result
 
         public void Startup()
         {
-            IPAddress serverAddr = IPAddress.Parse("25.21.58.123");
-            serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            serverSocket.Bind(new IPEndPoint(serverAddr, DEFAULT_PORT));
+            IPAddress serverAddr = IPAddress.Parse("127.0.0.1"); //set client's IP
+            serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); //create server socket
+            serverSocket.Bind(new IPEndPoint(serverAddr, DEFAULT_PORT)); //bind
 
             Console.WriteLine("Server started at:" + serverSocket.LocalEndPoint.ToString());
 
@@ -36,9 +36,9 @@ namespace ProjectTS
 
             try
             {
-                serverSocket.Listen(backlog);
+                serverSocket.Listen(backlog); //start listening
                 Console.WriteLine("Server listening");
-                clientSocket = serverSocket.Accept();
+                clientSocket = serverSocket.Accept(); //accept connection
                 isConnected = true;
                 Console.WriteLine("Client connected");
             }
@@ -46,7 +46,7 @@ namespace ProjectTS
             {
                 Console.WriteLine("Failed to listen" + ex.ToString());
             }
-            SetSessionId();
+            SetSessionId(); //set sessionId
 
             this.Run();
         }
@@ -62,9 +62,9 @@ namespace ProjectTS
 
         void SetSessionId()
         {
-            Packet pack = new Packet();
-            pack.sessionId = currentSessionId = 7;
-            clientSocket.Send(pack.GetBytes());
+            Packet pack = new Packet(); //create packet with Id to be set by client
+            pack.sessionId = currentSessionId = 7; //set Id to 7
+            clientSocket.Send(pack.GetBytes()); //serialize and send
             Console.WriteLine("Session ID is set: " + currentSessionId);
         }
 
@@ -74,10 +74,10 @@ namespace ProjectTS
             byte[] buffer = new byte[256];
             try
             {
-                var bytesrecd = clientSocket.Receive(buffer);
-                Packet pack = new Packet(buffer);
+                var bytesrecd = clientSocket.Receive(buffer); //receive data from client
+                Packet pack = new Packet(buffer); //deserialize and create packet with received data
 
-                if (pack.mode == Mode.TwoArguments)
+                if (pack.mode == Mode.TwoArguments) //if mode is two arguments, calculate with chosen operation
                 {
                     state = State.Nothing;
                     switch (pack.operation)
@@ -119,7 +119,7 @@ namespace ProjectTS
                             break;
                     }
                 }
-                else if (pack.mode == Mode.MultiArguments || pack.mode == Mode.MultiArgumentsLP)
+                else if (pack.mode == Mode.MultiArguments || pack.mode == Mode.MultiArgumentsLP) //if mode is multi arguments, calculate with chosen operation
                 {
                     switch (operation)
                     {
@@ -164,17 +164,17 @@ namespace ProjectTS
 
         public void SendData()
         {
-            Packet pack = new Packet();
-            pack.operation = Operation.Addition;
-            pack.number1 = result;
-            pack.number2 = 0;
-            pack.state = state;
-            pack.sessionId = currentSessionId;
-            pack.mode = Mode.NotDefined;
+            Packet pack = new Packet(); //create empty packet
+            pack.operation = Operation.Addition; //set any operation
+            pack.number1 = result; //first number in packet will be the result of calculation to this point
+            pack.number2 = 0; //set any second number
+            pack.state = state; //set state to that from flag
+            pack.sessionId = currentSessionId; //set Id from flag
+            pack.mode = Mode.NotDefined; //set any mode
             
             try
             {
-                clientSocket.Send(pack.GetBytes());
+                clientSocket.Send(pack.GetBytes()); //serialize and send
             }
             catch (Exception ex)
             {
